@@ -75,5 +75,10 @@ def frames_iter(socket):
             break
         while n > 0:
             result = read(socket, n)
-            n -= len(result)
+            data_length = len(result)
+            if data_length == 0L:
+                # We have reached EOF
+                return
+
+            n -= data_length
             yield result
