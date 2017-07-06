@@ -361,8 +361,9 @@ class EndpointSpec(dict):
           ``'vip'`` if not provided.
         ports (dict): Exposed ports that this service is accessible on from the
           outside, in the form of ``{ target_port: published_port }`` or
-          ``{ target_port: (published_port, protocol) }``. Ports can only be
-          provided if the ``vip`` resolution mode is used.
+          ``{ target_port: (published_port, protocol) }`` or
+          ``{ target_port: (published_port, protocol, publish_mode) }``.
+          Ports can only be provided if the ``vip`` resolution mode is used.
     """
     def __init__(self, mode=None, ports=None):
         if ports:
@@ -382,14 +383,17 @@ def convert_service_ports(ports):
     result = []
     for k, v in six.iteritems(ports):
         port_spec = {
-            'Protocol': 'tcp',
-            'PublishedPort': k
+            'Protocol': 'tcp'
         }
+        if k != 0:
+            port_spec['PublishedPort'] = k
 
         if isinstance(v, tuple):
             port_spec['TargetPort'] = v[0]
-            if len(v) == 2:
+            if len(v) >= 2:
                 port_spec['Protocol'] = v[1]
+            if len(v) == 3:
+                port_spec['PublishMode'] = v[2]
         else:
             port_spec['TargetPort'] = v
 
